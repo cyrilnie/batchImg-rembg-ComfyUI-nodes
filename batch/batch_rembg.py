@@ -23,7 +23,13 @@ class ImageRemoveBackgroundRembg:
         return {
             "required": {
                 "image": ("IMAGE",),
-                "model_name": (MODEL_LIST, {"default": "u2net"})
+                "model_name": (MODEL_LIST, {"default": "u2net"}),
+                "alpha_matting": ("BOOLEAN", {"default": False}),
+                "alpha_matting_foreground_threshold": ("INT", {"default": None}),
+                "alpha_matting_background_threshold": ("INT", {"default": None}),
+                "alpha_matting_erode_size": ("INT", {"default": None}),
+                "only_mask": ("BOOLEAN", {"default": False}),
+                "post_process_mask": ("BOOLEAN", {"default": False})
             },
         }
 
@@ -31,11 +37,11 @@ class ImageRemoveBackgroundRembg:
     FUNCTION = "remove_background"
     CATEGORY = "rembg"
 
-    def remove_background(self, image, model_name):
+    def remove_background(self, image, model_name, alpha_matting, alpha_matting_foreground_threshold, alpha_matting_background_threshold, alpha_matting_erode_size, only_mask, post_process_mask):
         session = new_session(model_name)
         img_list = []
         for img in tqdm(image, "Rembg"):
-            sep_img = pil2tensor(remove(tensor2pil(img), session = session))
+            sep_img = pil2tensor(remove(tensor2pil(img), session = session, alpha_matting = alpha_matting, alpha_matting_foreground_threshold = alpha_matting_foreground_threshold, alpha_matting_background_threshold = alpha_matting_background_threshold, alpha_matting_erode_size = alpha_matting_erode_size, only_mask = only_mask, post_process_mask = post_process_mask))
             img_list.append(sep_img)
 
         stack = reduce(lambda img1,img2: torch.cat([img1,img2]), img_list)
